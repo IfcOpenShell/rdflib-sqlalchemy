@@ -1,19 +1,19 @@
 #!/usr/bin/env python
 from setuptools import setup
 
-project = "rdflib-sqlalchemy"
-version = "0.5.5.dev0"
+project = "ifcopenshell-rdflib-sqlalchemy"
+version = "0.7.0"
 
 
 setup(
     name=project,
     version=version,
     description="rdflib extension adding SQLAlchemy as an AbstractSQLStore back-end store",
-    author="Graham Higgins, Adam Ever-Hadani",
-    author_email="gjhiggins@gmail.com, adamhadani@globality.com",
-    url="http://github.com/RDFLib/rdflib-sqlalchemy",
+    author="Graham Higgins, Adam Ever-Hadani, IfcOpenShell contributors",
+    author_email="gjhiggins@gmail.com, adamhadani@globality.com, dion@thinkmoult.com",
+    url="https://github.com/IfcOpenShell/rdflib-sqlalchemy",
     packages=["rdflib_sqlalchemy"],
-    download_url="https://github.com/RDFLib/rdflib-sqlalchemy/zipball/master",
+    download_url="https://github.com/IfcOpenShell/rdflib-sqlalchemy/zipball/develop",
     license="BSD",
     platforms=["any"],
     long_description="""
