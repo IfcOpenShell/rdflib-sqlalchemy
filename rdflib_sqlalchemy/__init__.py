@@ -8,7 +8,7 @@ if sys.version_info >= (3, 8):
 else:
     import importlib_metadata
 
-__version__ = importlib_metadata.version("rdflib_sqlalchemy")
+__version__ = importlib_metadata.version("ifcopenshell-rdflib-sqlalchemy")
 
 
 class NullHandler(logging.Handler):

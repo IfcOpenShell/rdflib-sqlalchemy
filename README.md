@@ -1,6 +1,17 @@
 RDFLib-SQLAlchemy
 =================
 
+This is IfcOpenShell's fork of [RDFLib/rdflib-sqlalchemy](https://github.com/RDFLib/rdflib-sqlalchemy),
+published on PyPI as `ifcopenshell-rdflib-sqlalchemy`, so that Bonsai's Brick support has a store that
+works with current SQLAlchemy and rdflib. It carries upstream's `develop` plus what upstream has not
+released or merged: SQLAlchemy 2.x support (including the `.subquery()` 2.1 needs), the where-clause
+guards from the `brickschema-rdflib-sqlalchemy` fork by Gabe Fierro, `importlib.metadata` instead of
+`pkg_resources`, and a graph-aware store as rdflib 7's Dataset requires. Fixes are offered upstream
+(RDFLib/rdflib-sqlalchemy#116, #117). The module name stays `rdflib_sqlalchemy` and the rdflib store
+plugin stays `SQLAlchemy`, so it is a drop-in replacement; do not install it alongside another
+`rdflib-sqlalchemy` distribution.
+
+
 A SQLAlchemy-backed, formula-aware RDFLib Store. It stores its triples
 in the following partitions:
 
