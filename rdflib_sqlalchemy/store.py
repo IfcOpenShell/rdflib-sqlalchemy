@@ -30,6 +30,7 @@ from rdflib_sqlalchemy.constants import (
 from rdflib_sqlalchemy.tables import (
     create_asserted_statements_table,
     create_literal_statements_table,
+    create_contexts_table,
     create_namespace_binds_table,
     create_quoted_statements_table,
     create_type_statements_table,
@@ -92,6 +93,7 @@ class SQLAlchemy(Store, SQLGeneratorMixin, StatisticsMixin):
     context_aware = True
     formula_aware = True
     transaction_aware = True
+    graph_aware = True
     regex_matching = PYTHON_REGEX
     configuration = Literal("sqlite://")
 
@@ -634,8 +636,34 @@ class SQLAlchemy(Store, SQLGeneratorMixin, StatisticsMixin):
         with self.engine.connect() as connection:
             res = connection.execute(q)
             rt = res.fetchall()
-        for context in [rtTuple[0] for rtTuple in rt]:
-            yield URIRef(context)
+            recorded = []
+            if triple is None:
+                contexts_table = self.tables["contexts"]
+                recorded = connection.execute(expression.select(contexts_table.c.context)).fetchall()
+        seen = set()
+        for context in [row[0] for row in rt] + [row[0] for row in recorded]:
+            if context not in seen:
+                seen.add(context)
+                yield URIRef(context)
+
+    # Graph-aware store interface
+
+    def add_graph(self, graph):
+        """Record a named graph, so that contexts() lists it while it is empty."""
+        contexts_table = self.tables["contexts"]
+        with self.engine.begin() as connection:
+            known = connection.execute(
+                expression.select(contexts_table.c.id).where(contexts_table.c.context == graph.identifier)
+            ).first()
+            if known is None:
+                connection.execute(contexts_table.insert().values(context=graph.identifier))
+
+    def remove_graph(self, graph):
+        """Remove a named graph and every triple in it."""
+        self.remove((None, None, None), graph)
+        contexts_table = self.tables["contexts"]
+        with self.engine.begin() as connection:
+            connection.execute(contexts_table.delete().where(contexts_table.c.context == graph.identifier))
 
     # Namespace persistence interface implementation
 
@@ -698,6 +726,7 @@ class SQLAlchemy(Store, SQLGeneratorMixin, StatisticsMixin):
             "literal_statements": create_literal_statements_table(self._interned_id, self.metadata),
             "quoted_statements": create_quoted_statements_table(self._interned_id, self.metadata),
             "namespace_binds": create_namespace_binds_table(self._interned_id, self.metadata),
+            "contexts": create_contexts_table(self._interned_id, self.metadata),
         }
 
     def _get_build_command(self, triple, context=None, quoted=False):

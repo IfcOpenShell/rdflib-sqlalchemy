@@ -7,6 +7,7 @@ MYSQL_MAX_INDEX_LENGTH = 200
 
 TABLE_NAME_TEMPLATES = [
     "{interned_id}_asserted_statements",
+    "{interned_id}_contexts",
     "{interned_id}_literal_statements",
     "{interned_id}_namespace_binds",
     "{interned_id}_quoted_statements",
@@ -210,4 +211,25 @@ def create_namespace_binds_table(interned_id, metadata):
             "uri",
             mysql_length=MYSQL_MAX_INDEX_LENGTH,
         )
+    )
+
+
+def create_contexts_table(interned_id, metadata):
+    """The named graphs the store knows, whether or not they hold triples.
+
+    A graph-aware store (rdflib's Dataset needs one) lists an added graph
+    while it is empty and forgets it on remove_graph(); the statement tables
+    only know a context once a triple is in it.
+    """
+    return Table(
+        "{interned_id}_contexts".format(interned_id=interned_id),
+        metadata,
+        Column("id", types.Integer, nullable=False, primary_key=True),
+        Column("context", TermType, nullable=False),
+        Index(
+            "{interned_id}_context_index".format(interned_id=interned_id),
+            "context",
+            unique=True,
+            mysql_length=MYSQL_MAX_INDEX_LENGTH,
+        ),
     )

@@ -173,6 +173,26 @@ class ContextTestCase(unittest.TestCase):
         self.assertIn(self.c1, contextList)
         self.assertIn(self.c2, contextList)
 
+    def testGraphAware(self):
+        # rdflib's Dataset needs a graph-aware store: a graph added through
+        # add_graph() is listed by contexts() while it is still empty, and
+        # remove_graph() takes it out together with its triples.
+        store = self.graph.store
+        self.assertTrue(store.graph_aware)
+        empty = URIRef("urn:x-rdflib:empty")
+        store.add_graph(Graph(store, empty))
+        store.add_graph(Graph(store, empty))
+        self.assertIn(empty, list(store.contexts()))
+        self.assertEqual(list(store.contexts()).count(empty), 1)
+        graph = Graph(store, self.c1)
+        graph.add((self.michel, self.likes, self.pizza))
+        self.assertIn(self.c1, list(store.contexts()))
+        store.remove_graph(graph)
+        self.assertNotIn(self.c1, list(store.contexts()))
+        self.assertEqual(len(list(graph.triples((None, None, None)))), 0)
+        store.remove_graph(Graph(store, empty))
+        self.assertNotIn(empty, list(store.contexts()))
+
     def testRemoveContext(self):
         c1 = self.c1
 
